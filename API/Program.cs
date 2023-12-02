@@ -1,6 +1,7 @@
 using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
+//using Microsoft.AspNet.WebApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors(opt => {
+    opt.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000", "https://localhost:3000");
+});
 
 app.UseHttpsRedirection();
 
