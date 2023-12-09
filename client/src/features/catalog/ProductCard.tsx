@@ -1,6 +1,5 @@
-import { ListItem, ListItemAvatar, Avatar, ListItemText, Card, CardContent, CardMedia, Typography, CardHeader, CardActions, Button } from "@mui/material";
+import { Avatar, Card, CardContent, CardMedia, Typography, CardHeader, CardActions, Button } from "@mui/material";
 import { Product } from "../../app/models/product";
-import ProductDetails from './ProductDetails';
 import { Link } from "react-router-dom";
 
 interface Props {
