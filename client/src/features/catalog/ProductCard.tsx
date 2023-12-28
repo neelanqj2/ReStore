@@ -1,12 +1,26 @@
 import { Avatar, Card, CardContent, CardMedia, Typography, CardHeader, CardActions, Button } from "@mui/material";
 import { Product } from "../../app/models/product";
 import { Link } from "react-router-dom";
+import agent from "../../app/api/agent";
+import { useState } from "react";
+import { LoadingButton } from "@mui/lab";
+import { useStoreContext } from "../../app/context/StoreContext";
 
 interface Props {
     product: Product;
 }
 
 export default function ProductCard({product}:Props) {
+    const [loading, setLoading] = useState(false);
+    const {setBasket} = useStoreContext();
+
+    function handleAddItem(productId: number) {
+        setLoading(true);
+        agent.Basket.addItem(productId)
+            .then(basket => setBasket(basket))
+            .catch(error => console.log(error))
+            .finally(()=>setLoading(false));
+    }
     return (
         <Card>
             <CardHeader
@@ -35,10 +49,14 @@ export default function ProductCard({product}:Props) {
                 </Typography>
             </CardContent>
             <CardActions>
-                <Button size="small">Add to Cart</Button>
+                <LoadingButton loading={loading} onClick={()=>handleAddItem(product.id)} size="small">Add to Cart</LoadingButton>
                 <Button size="small" component={Link} to={`/catalog/${product.id}`}>View</Button>
             </CardActions>
         </Card>
 
     );
+}
+
+function then(arg0: (basket: any) => void) {
+    throw new Error("Function not implemented.");
 }
