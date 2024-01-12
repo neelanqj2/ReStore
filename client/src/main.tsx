@@ -7,32 +7,16 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './app/router/Routes.tsx';
-import { StoreProvider } from './app/context/StoreContext.tsx';
 import { Provider } from 'react-redux'; 
-import { configureStore } from './app/store/configureStore.ts';
-
-/*
 import { store } from './app/store/configureStore.ts';
+import { fetchProductsAsync } from './features/catalog/catalogSlice';
+
+store.dispatch(fetchProductsAsync());
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <StoreProvider>
       <Provider store={store}>
         <RouterProvider router={router} />
       </Provider>
-    </StoreProvider>
-  </React.StrictMode>,
-)
-*/
-
-const store = configureStore();
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <StoreProvider>
-      <Provider store={store}>
-        <RouterProvider router={router} />
-      </Provider>
-    </StoreProvider>
   </React.StrictMode>,
 )
