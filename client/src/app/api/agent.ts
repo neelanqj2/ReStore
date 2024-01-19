@@ -2,6 +2,7 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { toast } from 'react-toastify';
 import { router } from '../router/Routes';
 import { PaginatedResponse } from '../models/pagination';
+import { store } from '../store/configureStore';
 
 const sleep = () => new Promise(resolve => setTimeout(resolve, 1000));
 axios.defaults.baseURL ='http://localhost:5000/api/';
@@ -9,12 +10,18 @@ axios.defaults.withCredentials = true;
 
 const responseBody = ( response: AxiosResponse ) => response.data;
 
+axios.interceptors.request.use(config => {
+    const token = store.getState().account.user?.token;
+    if(token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+});
+
 axios.interceptors.response.use(async response => { 
     await sleep();
     const pagination = response.headers['pagination'];
     if(pagination) {
         response.data = new PaginatedResponse(response.data, JSON.parse(pagination));
-        console.log(response);
+        // console.log(response);
         return response;
     } 
     return response; 
@@ -39,7 +46,7 @@ axios.interceptors.response.use(async response => {
                 toast.error(data.title);
                 break;
             case 401:
-                toast.error(data.title);
+                toast.error(data.title || 'Unauthorized');
                 break;            
             case 404:
                 toast.error(data.title);
@@ -79,7 +86,16 @@ const Basket = {
     addItem: (productId: number, quantity = 1) => requests.post(`basket?productId=${productId}&quantity=${quantity}`, {}),
     removeItem: (productId: number, quantity = 1) => requests.delete(`basket?productId=${productId}&quantity=${quantity}`),
 }
-
-const agent = { Catalog, TestErrors, Basket };
+const Account = {
+    login: (values: any) => requests.post('account/login', values),
+    register: (values: any) => requests.post('account/register', values),
+    currentuser: () => requests.get('account/currentUser')
+};
+const agent = { 
+    Catalog, 
+    TestErrors, 
+    Basket, 
+    Account 
+};
 
 export default agent;
