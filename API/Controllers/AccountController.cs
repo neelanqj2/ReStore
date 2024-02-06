@@ -46,6 +46,7 @@ namespace API.Controllers
                 Response.Cookies.Delete("buyerId");
                 await _context.SaveChangesAsync();
             }
+            
             return new UserDto {
                 Email = user.Email,
                 Token = await _tokenService.GenerateToken(user),
@@ -86,7 +87,14 @@ namespace API.Controllers
             };
         }
 
-
+        [Authorize]
+        [HttpGet("savedAddress")]
+        public async Task<ActionResult<UserAddress>> GetSavedAddress() {
+            return await _userManager.Users
+                .Where(x => x.UserName == User.Identity.Name)
+                .Select(user => user.Address)
+                .FirstOrDefaultAsync();
+        }
         private async Task<Basket> RetrieveBasket(string buyerId)
         {
             if (string.IsNullOrEmpty(buyerId))

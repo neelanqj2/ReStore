@@ -1,4 +1,4 @@
-import { MetaData } from './pagination';
+
 export interface MetaData {
     currentPage: number;
     totalPages: number;

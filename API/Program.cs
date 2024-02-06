@@ -57,7 +57,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 builder.Services.AddCors();
 builder.Services.AddIdentityCore<User>()
-    .AddRoles<IdentityRole>()
+    .AddRoles<Role>()
     .AddEntityFrameworkStores<StoreContext>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(opt => {

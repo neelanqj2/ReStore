@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+
 using API.Data;
 using API.DTOs;
 using API.Entities;
@@ -84,7 +85,7 @@ namespace API.Controllers
 
         private string GetBuyerId()
         {
-            return User.Identity.Name ?? Request.Cookies["buyerId"];
+            return User.Identity?.Name ?? Request.Cookies["buyerId"];
         }
      
         private Basket CreateBasket()

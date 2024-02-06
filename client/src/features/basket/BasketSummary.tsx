@@ -2,9 +2,13 @@ import { TableContainer, Paper, Table, TableBody, TableRow, TableCell } from "@m
 import { currencyFormat } from '../../app/util/util';
 import { useAppSelector } from "../../app/store/configureStore";
 
-export default function BasketSummary() {
+interface Props {
+    subtotal?: number
+}
+
+export default function BasketSummary({ subtotal }: Props) {
     const { basket } = useAppSelector(state => state.basket);
-    const subtotal = basket?.items.reduce((sum, curVal) => sum = sum + curVal.quantity * curVal.price, 0) ?? 0;
+    if(subtotal === undefined) subtotal = basket?.items.reduce((sum, curVal) => sum = sum + curVal.quantity * curVal.price, 0) ?? 0;
     const deliveryFee = 5;
 
     return (
