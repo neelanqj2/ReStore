@@ -1,4 +1,5 @@
 import { Checkbox, FormControlLabel } from "@mui/material";
+import { useEffect } from "react";
 import { UseControllerProps, useController } from "react-hook-form";
 
 interface Props extends UseControllerProps {
@@ -14,8 +15,8 @@ export default function AppCheckbox(props: Props) {
             control={
                 <Checkbox
                     {...field}
-                    disabled={props.disabled}
-                    checked={field.value}
+                    disabled={props?.disabled}
+                    checked={field?.value}
                     color='secondary'
                     />
             }

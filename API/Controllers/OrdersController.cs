@@ -41,7 +41,7 @@ namespace API.Controllers
                 .FirstOrDefaultAsync();
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateOrder")]
         public async Task<ActionResult<int>> CreateOrder(CreateOrderDto orderDto){
             var basket = await _context.Basket
                 .RetrieveBasketWithItems(User.Identity.Name)
@@ -78,7 +78,8 @@ namespace API.Controllers
                 BuyerId = User.Identity.Name,
                 ShippingAddress = orderDto.ShippingAddress,
                 Subtotal = subtotal,
-                DeliveryFee = deliveryFee
+                DeliveryFee = deliveryFee,
+                PaymentIntentId = basket.PaymentIntentId
             };
 
             _context.Orders.Add(order);

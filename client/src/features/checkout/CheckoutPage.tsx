@@ -7,32 +7,59 @@ import Review from "./Review";
 import { FieldValues, FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { validationSchema } from "./checkoutValidation";
-import { useAppDispatch } from "../../app/store/configureStore";
+import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import agent from "../../app/api/agent";
 import { clearBasket } from "../basket/basketSlice";
+import { StripeElementType } from "@stripe/stripe-js";
+import { useElements, useStripe, CardNumberElement } from '@stripe/react-stripe-js';
 
 const steps = ['Shipping address', 'Review your order', 'Payment details'];
-
-function getStepContent(step: number) {
-    switch (step) {
-        case 0:
-            return <AddressForm />;
-        case 1:
-            return <Review />;
-        case 2:
-            return <PaymentForm />;
-        default:
-            throw new Error('Unknown step');
-    }
-}
 
 export default function CheckoutPage() {
     const [activeStep, setActiveStep] = useState(0);
     const [orderNumber, setOrderNumber] = useState(0);
     const [loading, setLoading] = useState(false);
     const dispatch = useAppDispatch();
-    const currentValidationSchema = validationSchema[activeStep];
+    const [cardState, setCardState] = useState<{ elementError: { [key in StripeElementType]?: string } }>({ elementError: {} });
+    const [cardComplete, setCardComplete] = useState<any>({ cardNumber: false, cardExpiry: false, cardCvc: false });
+    const [paymentMessage, setPaymentMessage] = useState("");
+    const [paymentSucceeded, setPaymentSucceeded] = useState(false);
+    const {basket} = useAppSelector(state => state.basket);
+    const stripe = useStripe();
+    const elements = useElements();
 
+
+    function onCardInputChange(event: any) {
+        setCardState({
+            ...cardState,
+            elementError: {
+                ...cardState.elementError,
+                [event.elementType]: event.error?.message
+            }
+        });
+
+        setCardComplete({
+            ...cardComplete,
+            elementError: {
+                [event.elementType]: event.complete
+            }
+        });
+    }
+
+
+    function getStepContent(step: number) {
+        switch (step) {
+            case 0:
+                return <AddressForm />;
+            case 1:
+                return <Review />;
+            case 2:
+                return <PaymentForm cardState={cardState} onCardInputChange={onCardInputChange} />;
+            default:
+                throw new Error('Unknown step');
+        }
+    }
+    const currentValidationSchema = validationSchema[activeStep];
     const methods = useForm({
         mode: 'all',
         resolver: yupResolver(currentValidationSchema)
@@ -40,31 +67,57 @@ export default function CheckoutPage() {
 
     useEffect(() => {
         if(!loading) {
-        agent.Account.fetchAddress()
+            agent.Account.fetchAddress()
             .then(response => {
                 if(response) {
                     methods.reset({...methods.getValues(), ...response, saveAddress: false})
                 }
             });
         }
-    }, [methods, loading])
+    }, [methods, loading]);
 
-    const handleNext = async (data: FieldValues) => {
+    async function submitOrder(data:FieldValues) {
+        setLoading(true);
         const {nameOnCard, saveAddress, ...shippingAddress} = data;
 
-        if(activeStep === steps.length - 1) {
-            setLoading(true);
-            try {
+        if(!stripe || !elements) return;
+
+        try {
+            const cardElement = elements.getElement(CardNumberElement);
+            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+            const paymentResult = await stripe.confirmCardPayment(basket?.clientSecret!, {
+                payment_method: {
+                    card: cardElement!,
+                    billing_details: {
+                        name: nameOnCard
+                    }
+                }
+            });
+            console.log(paymentResult);
+            if(paymentResult.paymentIntent?.status === 'succeeded') {
                 const orderNumber = await agent.Orders.create({saveAddress, shippingAddress});
                 setOrderNumber(orderNumber);
-                setActiveStep(activeStep + 1);
+                setPaymentSucceeded(true);
+                setPaymentMessage('Thank you - we have recieved your payment');
+                setActiveStep(activeStep+1);
                 dispatch(clearBasket());
                 setLoading(false);
-            }catch (error) {
-                console.log(error);
-                setLoading(false);
+            } else {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+                setPaymentMessage(paymentResult.error?.message!);
+                setPaymentSucceeded(false);
+                setActiveStep(activeStep + 1);
+                setLoading(false); 
             }
-            console.log(data)
+        } catch(error) {
+            console.log(error);
+            setLoading(false);
+        }
+    }
+
+    const handleNext = async (data: FieldValues) => {
+        if(activeStep === steps.length - 1) {
+            await submitOrder(data);
         } else { 
             setActiveStep(activeStep + 1);
         }
@@ -73,6 +126,17 @@ export default function CheckoutPage() {
     const handleBack = () => {
         setActiveStep(activeStep - 1);
     };
+
+    function submitDisabled(): boolean {
+        if(activeStep === steps.length - 1) {
+            return !cardComplete.cardCvc 
+                || !cardComplete.cardExpiry 
+                || !cardComplete.cardNumber
+                || !methods.formState.isValid
+        } else {
+            return !methods.formState.isValid
+        }
+    }
     return (
         <FormProvider {...methods}>
             <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
@@ -90,13 +154,18 @@ export default function CheckoutPage() {
                     {activeStep === steps.length ? (
                         <>
                             <Typography variant="h5" gutterBottom>
-                                Thank you for your order.
+                                {paymentMessage}
                             </Typography>
+                            {paymentSucceeded? (
                             <Typography variant="subtitle1">
                                 Your order number is #{orderNumber}. We have emailed your order
                                 confirmation, and will send you an update when your order has
                                 shipped.
-                            </Typography>
+                            </Typography>):(
+                                <Button variant='contained' onClick={handleBack}>
+                                    Go back and try again
+                                </Button>
+                            )}
                         </>
                     ) : (
                         <form onSubmit={methods.handleSubmit(handleNext)}>
@@ -109,7 +178,7 @@ export default function CheckoutPage() {
                                 )}
                                 <LoadingButton
                                     loading={loading}
-                                    disabled={!methods.formState.isValid}
+                                    // disabled={!loading ? submitDisabled(): true}
                                     variant="contained"
                                     type="submit"
                                     sx={{ mt: 3, ml: 1 }}
