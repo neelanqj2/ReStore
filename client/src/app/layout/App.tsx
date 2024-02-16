@@ -10,6 +10,7 @@ import LoadingComponent from './LoadingComponent';
 import { useAppDispatch } from '../store/configureStore';
 import { fetchBasketAsync, setBasket } from '../../features/basket/basketSlice';
 import { fetchCurrentUser } from '../../features/account/accountSlice';
+import HomePage from '../../features/home/HomePage';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -52,7 +53,7 @@ function App() {
       }
     }
   });
-  if (loading) return <LoadingComponent message='Initializing app ...' />
+  // if (loading) return <LoadingComponent message='Initializing app ...' />
 
   function handleThemeChange() {
     setDarkMode(!darkMode);
@@ -63,9 +64,11 @@ function App() {
     <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
     <CssBaseline />
       <Header darkMode={darkMode} handleThemeChange={handleThemeChange}/>
-      <Container>
-        <Outlet  />
-      </Container>
+      {
+      loading ? <LoadingComponent message="Initializing app..." />
+        : location.pathname === '/' ? <HomePage />
+            : <Container sx={{ mt: 4 }}><Outlet /></Container>
+      }
     </ThemeProvider>
   )
 }

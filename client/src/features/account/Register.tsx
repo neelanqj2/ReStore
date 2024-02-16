@@ -21,7 +21,7 @@ const defaultTheme = createTheme();
 
 export default function Register() {
     const navigate = useNavigate();
-    const { register, handleSubmit, formState: { isSubmitting, errors, isValid } } = useForm({
+    const { register, handleSubmit, formState: { isSubmitting, errors, isValid }, setError } = useForm({
         mode: 'onTouched'
     });
 
@@ -137,8 +137,5 @@ export default function Register() {
             </Container>
         </ThemeProvider>
     );
-}
-function setError(arg0: string, arg1: { message: string; }) {
-    throw new Error('Function not implemented.');
 }
 

@@ -5,6 +5,7 @@ import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, 
 import { Order } from '../../app/models/order';
 import { currencyFormat } from "../../app/util/util";
 import OrderDetails from "./OrderDetails";
+
 export default function Orders(){
     const [orders,setOrders] = useState<Order[] | null>(null);
     const [loading,setLoading] = useState(true);
@@ -17,7 +18,7 @@ export default function Orders(){
             .finally(()=>setLoading(false))
     },[]);
 
-    if (loading) return <LoadingComponent message='Loading orders ...' > </LoadingComponent>
+    if (loading) return <LoadingComponent message='Loading orders ...'/>
     
 
     if(selectedOrderNumber > 0) return (

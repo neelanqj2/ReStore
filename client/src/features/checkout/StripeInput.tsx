@@ -1,8 +1,8 @@
 import { InputBaseComponentProps } from '@mui/material';
-import { forwardRef, useRef, useImperativeHandle } from 'react';
+import { forwardRef, useRef, useImperativeHandle, Ref } from 'react';
 
 // You could use the react CardElement
-interface Props extends InputBaseComponentProps {};
+type Props = InputBaseComponentProps;
 
 export const StripeInput = forwardRef(function StripeInput({component: Component, ...props}: Props,
     ref: Ref<unknown>){

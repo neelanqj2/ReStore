@@ -1,7 +1,8 @@
 import { Basket } from "./basket";
 
 export interface User {
-    username: string;
+    email: string;
     password: string;
+    token: string;
     basket?: Basket;
 }

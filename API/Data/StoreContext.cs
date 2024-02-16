@@ -25,7 +25,7 @@ namespace API.Data
                 .WithOne()
                 .HasForeignKey<UserAddress>(a => a.Id)
                 .OnDelete(DeleteBehavior.Cascade);
-
+            
             builder.Entity<Role>()
                 .HasData(
                     new Role { Id=1, Name = "Member", NormalizedName="MEMBER" },

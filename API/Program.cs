@@ -1,19 +1,18 @@
-using System.ComponentModel;
+using System.Security.AccessControl;
 using System.Text;
-using System;
-using API.Middleware;
 using API.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using API.Entities;
+using API.Middleware;
+using API.RequestHelpers;
 using API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
+Console.WriteLine(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -22,21 +21,22 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 // Add JWT Token to request header
-builder.Services.AddSwaggerGen(c => {
+builder.Services.AddSwaggerGen(c =>
+    {
     var jwtSecurityScheme = new OpenApiSecurityScheme
     {
-        BearerFormat="JWT",
+        BearerFormat = "JWT",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
         Scheme = JwtBearerDefaults.AuthenticationScheme,
-        Description = "Put Bearer + your token in the box below",
-        Reference = new OpenApiReference {
+        Description = "Put bearer + your token in the box below",
+        Reference = new OpenApiReference
+        {
             Id = JwtBearerDefaults.AuthenticationScheme,
             Type = ReferenceType.SecurityScheme
         }
     };
-
     c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
     c.AddSecurityRequirement(new OpenApiSecurityRequirement 
     {
@@ -45,9 +45,14 @@ builder.Services.AddSwaggerGen(c => {
         }
     });
 });
+
+builder.Services.AddCors();
 builder.Services.AddDbContext<StoreContext>(opt => {
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+Console.WriteLine("---");
+Console.WriteLine(builder.Configuration.GetConnectionString("DefaultConnection"));
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
@@ -55,7 +60,6 @@ builder.Services.AddSwaggerGen(c =>
     c.IgnoreObsoleteProperties();
     c.CustomSchemaIds(type => type.FullName);
 });
-builder.Services.AddCors();
 builder.Services.AddIdentityCore<User>()
     .AddRoles<Role>()
     .AddEntityFrameworkStores<StoreContext>();
@@ -71,6 +75,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     };
 });
 
+Console.WriteLine("---");
+Console.WriteLine(builder.Configuration["JWTSettings:TokenKey"]);
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<PaymentService>();
@@ -88,15 +94,26 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseCors(opt => {
-    opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3000");
+    opt
+	//.AllowAnyOrigin()
+	.AllowAnyHeader()
+    .SetIsOriginAllowed(origin => true)
+	.AllowAnyMethod()
+    .AllowCredentials()
+    .WithOrigins("AllowAll");
 });
 
-app.UseHttpsRedirection();
+
 app.UseAuthentication(); // Find out who user is
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapFallbackToController("Index", "fallback", "Fallback");
+
 
 var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<StoreContext>();

@@ -178,7 +178,7 @@ export default function CheckoutPage() {
                                 )}
                                 <LoadingButton
                                     loading={loading}
-                                    // disabled={!loading ? submitDisabled(): true}
+                                    disabled={!loading ? submitDisabled(): true}
                                     variant="contained"
                                     type="submit"
                                     sx={{ mt: 3, ml: 1 }}

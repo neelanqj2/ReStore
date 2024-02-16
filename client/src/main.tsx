@@ -10,6 +10,8 @@ import { router } from './app/router/Routes.tsx';
 import { Provider } from 'react-redux'; 
 import { store } from './app/store/configureStore.ts';
 import { fetchProductsAsync } from './features/catalog/catalogSlice';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 store.dispatch(fetchProductsAsync());
 

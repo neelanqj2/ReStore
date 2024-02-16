@@ -84,7 +84,7 @@ export const accountSlice = createSlice({
                 signInUser.rejected, 
                 fetchCurrentUser.rejected
                 ),
-            (state, action) => {
+            (_, action) => {
                 throw action.payload;
             });
     })
