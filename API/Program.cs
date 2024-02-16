@@ -94,6 +94,9 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+
+//app.MapControllers();
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -112,7 +115,7 @@ app.UseAuthentication(); // Find out who user is
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapFallbackToController("Index", "fallback", "Fallback");
+app.MapFallbackToController("Index", "Fallback");
 
 
 var scope = app.Services.CreateScope();
