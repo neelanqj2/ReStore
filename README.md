@@ -1,0 +1,2 @@
+There seems to be an issue with the experimental version of VITE with the version of .NET that I used for this project consequently, while the project is complete and workable the initial load screen links do not redirect. But if you reload the page with the sub urls, which loads the same page, it begins to work.
+I'll fix this when I can be bothered by this. But for now, I'll continue back to doing interview preparation.
