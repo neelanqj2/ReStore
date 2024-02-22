@@ -11,7 +11,7 @@ namespace API.Controllers
             PhysicalFileResult pf = PhysicalFile(
                 Path.Combine(
                     Directory.GetCurrentDirectory(), 
-                    "wwwroot/", 
+                    "wwwroot", 
                     "index.html"), 
                 "text/HTML");
 

@@ -1,7 +1,7 @@
 import { Container, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import Header from './Header';
 import { useCallback, useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import agent from '../api/agent';
@@ -14,6 +14,7 @@ import HomePage from '../../features/home/HomePage';
 
 function App() {
   const dispatch = useAppDispatch();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
 
   const initApp = useCallback(async ()=>{
